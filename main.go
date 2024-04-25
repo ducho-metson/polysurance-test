@@ -8,12 +8,6 @@ import (
 	"github.com/ducho-metson/polysurance-test/sales"
 )
 
-const (
-	DiscountFilePath = "./data/discounts.json"
-	OrdersFilePath   = "./data/discounts.json"
-	ProductsFilePath = "./data/discounts.json"
-)
-
 func main() {
 	fmt.Println("Starting Fullstack Devoloper Test...")
 

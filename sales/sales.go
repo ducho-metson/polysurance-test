@@ -33,8 +33,8 @@ func buildOrderInfo(data *model.Data) []OrderInfo {
 	for _, order := range data.Orders {
 		orderPrice := 0.0
 		for _, item := range order.Items {
-			price := model.GetPriceFromSku(data.Products, item.SKU)
-			if price < 0.0 {
+			price := model.GetPriceFromSku(data, item.SKU)
+			if price <= 0.0 {
 				continue
 			}
 
@@ -43,7 +43,7 @@ func buildOrderInfo(data *model.Data) []OrderInfo {
 
 		orderInfoArray = append(orderInfoArray, OrderInfo{
 			price:    orderPrice,
-			discount: model.GetDiscountAsFloat(order.Discount),
+			discount: model.GetDiscountAsFloat(data, order.Discount),
 		})
 
 	}

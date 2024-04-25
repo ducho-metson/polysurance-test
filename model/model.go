@@ -2,15 +2,14 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/ducho-metson/polysurance-test/utils"
 )
 
 type Data struct {
-	Products  []Product
+	Products  map[int]float64
 	Orders    []Order
-	Discounts []Discount
+	Discounts map[string]float64
 }
 
 type Product struct {
@@ -37,37 +36,31 @@ type Discount struct {
 func ParseData(discountFilePath, ordersFilePath, productsFilePath string) (*Data, error) {
 	discountsFileAsByte, err := utils.ReadFile(discountFilePath)
 	if err != nil {
-		fmt.Println("failed reading file", discountFilePath)
 		return nil, err
 	}
 
 	discounts, err := parseDiscount(discountsFileAsByte)
 	if err != nil {
-		fmt.Println("failed parsing file", discountFilePath)
 		return nil, err
 	}
 
 	ordersFileAsByte, err := utils.ReadFile(ordersFilePath)
 	if err != nil {
-		fmt.Println("failed reading file", ordersFilePath)
 		return nil, err
 	}
 
 	orders, err := parseOrder(ordersFileAsByte)
 	if err != nil {
-		fmt.Println("failed parsing file", ordersFilePath)
 		return nil, err
 	}
 
 	productsFileAsByte, err := utils.ReadFile(productsFilePath)
 	if err != nil {
-		fmt.Println("failed reading file", productsFilePath)
 		return nil, err
 	}
 
 	products, err := parseProduct(productsFileAsByte)
 	if err != nil {
-		fmt.Println("failed parsing file", productsFilePath)
 		return nil, err
 	}
 
@@ -78,14 +71,20 @@ func ParseData(discountFilePath, ordersFilePath, productsFilePath string) (*Data
 	}, nil
 }
 
-func parseProduct(jsonData []byte) ([]Product, error) {
+func parseProduct(jsonData []byte) (map[int]float64, error) {
 	var products []Product
 	err := json.Unmarshal([]byte(jsonData), &products)
 	if err != nil {
 		return nil, err
 	}
 
-	return products, nil
+	productsAsMap := make(map[int]float64)
+
+	for _, product := range products {
+		productsAsMap[product.SKU] = product.Price
+	}
+
+	return productsAsMap, nil
 }
 
 func parseOrder(jsonData []byte) ([]Order, error) {
@@ -98,35 +97,34 @@ func parseOrder(jsonData []byte) ([]Order, error) {
 	return orders, nil
 }
 
-func parseDiscount(jsonData []byte) ([]Discount, error) {
+func parseDiscount(jsonData []byte) (map[string]float64, error) {
 	var discounts []Discount
 	err := json.Unmarshal([]byte(jsonData), &discounts)
 	if err != nil {
 		return nil, err
 	}
 
-	return discounts, nil
+	discountsAsMap := make(map[string]float64)
+
+	for _, discount := range discounts {
+		discountsAsMap[discount.Key] = discount.Value
+	}
+
+	return discountsAsMap, nil
 }
 
-func GetPriceFromSku(products []Product, sku int) float64 {
-	for _, product := range products {
-		if product.SKU == sku {
-			return product.Price
-		}
+func GetPriceFromSku(data *Data, sku int) float64 {
+	if price, ok := data.Products[sku]; ok {
+		return price
 	}
 
 	return -1.0
 }
 
-func GetDiscountAsFloat(discount string) float64 {
-	switch discount {
-	case "SALE10":
-		return 0.1
-	case "SALE20":
-		return 0.2
-	case "SALE30":
-		return 0.3
-	default:
-		return 0.0
+func GetDiscountAsFloat(data *Data, discountKey string) float64 {
+	if discount, ok := data.Discounts[discountKey]; ok {
+		return discount
 	}
+
+	return 0.0
 }
