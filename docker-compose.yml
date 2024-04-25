@@ -1,4 +1,7 @@
-version: "3"
+version: '3'
 services:
   app:
     build: .
+    environment:
+      - ARGUMENT=part1
+    command: ["./main", "${ARGUMENT}"]

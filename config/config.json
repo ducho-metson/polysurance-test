@@ -1,5 +1,6 @@
 {
-    "discountsFilePath": "./data/discounts.json",
-    "ordersFilePath": "./data/orders.json",
-    "productsFilePath": "./data/products.json"
+    "dataPath": "./data",
+    "discountsFilename": "discounts.json",
+    "ordersFilename": "orders.json",
+    "productsFilename": "products.json"
 }

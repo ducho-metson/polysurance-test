@@ -2,6 +2,7 @@ package sales
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ducho-metson/polysurance-test/model"
 	"github.com/ducho-metson/polysurance-test/utils"
@@ -43,14 +44,41 @@ func buildOrderInfo(salesData *model.SalesData) []OrderInfo {
 			orderPrice = orderPrice + price*float64(item.Quantity)
 		}
 
+		totalDiscount := calculateOrderTotalDiscount(order, salesData)
+
 		orderInfoArray = append(orderInfoArray, OrderInfo{
 			price:    orderPrice,
-			discount: salesData.GetDiscountAsFloat(order.Discount),
+			discount: totalDiscount,
 		})
 
 	}
 
 	return orderInfoArray
+}
+
+func calculateOrderTotalDiscount(order model.Order, salesData *model.SalesData) float64 {
+	totalDiscount := 0.0
+	discounts := strings.Split(order.Discount, ",")
+	numDiscounts := len(discounts)
+
+	switch numDiscounts {
+	case 0:
+		return 0.0
+	case 1:
+		return salesData.GetDiscountAsFloat(discounts[0])
+	default:
+		totalDiscount = salesData.GetDiscountAsFloat(discounts[0])
+		for idx, discountString := range discounts {
+			if idx == 0 {
+				continue
+			}
+
+			if salesData.IsDiscountStackable(discountString) {
+				totalDiscount = totalDiscount + salesData.GetDiscountAsFloat(discountString)
+			}
+		}
+		return totalDiscount
+	}
 }
 
 func calculateTotalSalesBeforeDiscountApplied(orderInfoArray []OrderInfo) float64 {

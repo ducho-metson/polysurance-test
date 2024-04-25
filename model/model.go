@@ -11,7 +11,7 @@ import (
 type SalesData struct {
 	Products  map[int]float64
 	Orders    []Order
-	Discounts map[string]float64
+	Discounts map[string]Discount
 }
 
 type Product struct {
@@ -31,8 +31,11 @@ type Order struct {
 }
 
 type Discount struct {
-	Key   string  `json:"key"`
-	Value float64 `json:"value"`
+	Key    string  `json:"key"`
+	Value  float64 `json:"value"`
+	Stacks string  `json:"stacks,omitempty"`
+
+	isStackable bool
 }
 
 // ParseSalesData reads orders, products and discounts files from data folder and parse every information
@@ -101,17 +104,20 @@ func parseOrder(jsonData []byte) ([]Order, error) {
 	return orders, nil
 }
 
-func parseDiscount(jsonData []byte) (map[string]float64, error) {
+func parseDiscount(jsonData []byte) (map[string]Discount, error) {
 	var discounts []Discount
 	err := json.Unmarshal([]byte(jsonData), &discounts)
 	if err != nil {
 		return nil, err
 	}
 
-	discountsAsMap := make(map[string]float64)
+	discountsAsMap := make(map[string]Discount)
 
 	for _, discount := range discounts {
-		discountsAsMap[discount.Key] = discount.Value
+		if discount.Stacks == "TRUE" {
+			discount.isStackable = true
+		}
+		discountsAsMap[discount.Key] = discount
 	}
 
 	return discountsAsMap, nil
@@ -127,8 +133,16 @@ func (d *SalesData) GetPriceFromSku(sku int) float64 {
 
 func (d *SalesData) GetDiscountAsFloat(discountKey string) float64 {
 	if discount, ok := d.Discounts[discountKey]; ok {
-		return discount
+		return discount.Value
 	}
 
 	return 0.0
+}
+
+func (d *SalesData) IsDiscountStackable(discountKey string) bool {
+	if discount, ok := d.Discounts[discountKey]; ok {
+		return discount.isStackable
+	}
+
+	return false
 }
