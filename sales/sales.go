@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ducho-metson/polysurance-test/model"
+	"github.com/ducho-metson/polysurance-test/utils"
 )
 
 type OrderInfo struct {
@@ -15,16 +16,16 @@ func Calculate(data *model.Data) {
 	orderInfoArray := buildOrderInfo(data)
 
 	totalSalesBeforeDiscount := calculateTotalSalesBeforeDiscountApplied(orderInfoArray)
-	fmt.Println("Total sales before discount is applied: ", totalSalesBeforeDiscount)
+	fmt.Println("Total sales before discount is applied: ", utils.RoundTo2DecimalPlaces(totalSalesBeforeDiscount))
 
 	totalSalesAfterDiscount := calculateTotalSalesAfterDiscountApplied(orderInfoArray)
-	fmt.Println("Total sales after discount is applied: ", totalSalesAfterDiscount)
+	fmt.Println("Total sales after discount is applied: ", utils.RoundTo2DecimalPlaces(totalSalesAfterDiscount))
 
-	moneyLostViaDiscount := totalSalesBeforeDiscount - totalSalesAfterDiscount
+	moneyLostViaDiscount := utils.RoundTo2DecimalPlaces(totalSalesBeforeDiscount - totalSalesAfterDiscount)
 	fmt.Println("Total amount of money lost via customer using discount codes: ", moneyLostViaDiscount)
 
 	averageDiscountPerCustomer := calculateAverageDiscountPerCustomer(orderInfoArray)
-	fmt.Println("Average discount per customer as a percentage: ", averageDiscountPerCustomer)
+	fmt.Println("Average discount per customer as a percentage: ", utils.RoundTo2DecimalPlaces(averageDiscountPerCustomer), "%")
 }
 
 func buildOrderInfo(data *model.Data) []OrderInfo {

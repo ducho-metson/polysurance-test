@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io"
+	"math"
 	"os"
 )
 
@@ -19,4 +20,8 @@ func ReadFile(filePath string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func RoundTo2DecimalPlaces(value float64) float64 {
+	return math.Round(value*100) / 100
 }
