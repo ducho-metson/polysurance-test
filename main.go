@@ -17,11 +17,11 @@ func main() {
 		return
 	}
 
-	data, err := model.ParseData(cfg.DiscountsFilePath, cfg.OrdersFilePath, cfg.ProductsFilePath)
+	salesData, err := model.ParseSalesData(cfg.DiscountsFilePath, cfg.OrdersFilePath, cfg.ProductsFilePath)
 	if err != nil {
 		fmt.Println("failed parsing sales data file")
 		return
 	}
 
-	sales.Calculate(data)
+	sales.Calculate(salesData)
 }

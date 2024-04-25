@@ -12,8 +12,8 @@ type OrderInfo struct {
 	discount float64
 }
 
-func Calculate(data *model.Data) {
-	orderInfoArray := buildOrderInfo(data)
+func Calculate(salesData *model.SalesData) {
+	orderInfoArray := buildOrderInfo(salesData)
 
 	totalSalesBeforeDiscount := calculateTotalSalesBeforeDiscountApplied(orderInfoArray)
 	fmt.Println("Total sales before discount is applied: ", utils.RoundTo2DecimalPlaces(totalSalesBeforeDiscount))
@@ -28,13 +28,14 @@ func Calculate(data *model.Data) {
 	fmt.Println("Average discount per customer as a percentage: ", utils.RoundTo2DecimalPlaces(averageDiscountPerCustomer), "%")
 }
 
-func buildOrderInfo(data *model.Data) []OrderInfo {
+// buildOrderInfo builds a Order Info array from SalesData. Getting every order total price and discount, if exists.
+func buildOrderInfo(salesData *model.SalesData) []OrderInfo {
 	var orderInfoArray []OrderInfo
 
-	for _, order := range data.Orders {
+	for _, order := range salesData.Orders {
 		orderPrice := 0.0
 		for _, item := range order.Items {
-			price := model.GetPriceFromSku(data, item.SKU)
+			price := salesData.GetPriceFromSku(item.SKU)
 			if price <= 0.0 {
 				continue
 			}
@@ -44,7 +45,7 @@ func buildOrderInfo(data *model.Data) []OrderInfo {
 
 		orderInfoArray = append(orderInfoArray, OrderInfo{
 			price:    orderPrice,
-			discount: model.GetDiscountAsFloat(data, order.Discount),
+			discount: salesData.GetDiscountAsFloat(order.Discount),
 		})
 
 	}

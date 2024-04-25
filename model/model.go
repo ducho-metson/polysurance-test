@@ -6,7 +6,9 @@ import (
 	"github.com/ducho-metson/polysurance-test/utils"
 )
 
-type Data struct {
+// SalesData is a struct suposed to hold every information about Products, Discounts and Orders provided by
+// given files. Both Products and Discounts fields are map in order to optimize searching operations.
+type SalesData struct {
 	Products  map[int]float64
 	Orders    []Order
 	Discounts map[string]float64
@@ -33,7 +35,9 @@ type Discount struct {
 	Value float64 `json:"value"`
 }
 
-func ParseData(discountFilePath, ordersFilePath, productsFilePath string) (*Data, error) {
+// ParseSalesData reads orders, products and discounts files from data folder and parse every information
+// to a reference of type Data.
+func ParseSalesData(discountFilePath, ordersFilePath, productsFilePath string) (*SalesData, error) {
 	discountsFileAsByte, err := utils.ReadFile(discountFilePath)
 	if err != nil {
 		return nil, err
@@ -64,7 +68,7 @@ func ParseData(discountFilePath, ordersFilePath, productsFilePath string) (*Data
 		return nil, err
 	}
 
-	return &Data{
+	return &SalesData{
 		Products:  products,
 		Orders:    orders,
 		Discounts: discounts,
@@ -113,16 +117,16 @@ func parseDiscount(jsonData []byte) (map[string]float64, error) {
 	return discountsAsMap, nil
 }
 
-func GetPriceFromSku(data *Data, sku int) float64 {
-	if price, ok := data.Products[sku]; ok {
+func (d *SalesData) GetPriceFromSku(sku int) float64 {
+	if price, ok := d.Products[sku]; ok {
 		return price
 	}
 
 	return -1.0
 }
 
-func GetDiscountAsFloat(data *Data, discountKey string) float64 {
-	if discount, ok := data.Discounts[discountKey]; ok {
+func (d *SalesData) GetDiscountAsFloat(discountKey string) float64 {
+	if discount, ok := d.Discounts[discountKey]; ok {
 		return discount
 	}
 
